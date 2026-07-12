@@ -1,0 +1,26 @@
+main_gba.o: \
+ C:/Users/mista/Desktop/JotPK/butano/hw/3rd_party/maxmod/src/gba/main_gba.c \
+ C:/Users/mista/Desktop/JotPK/butano/hw/3rd_party/maxmod/include/maxmod.h \
+ C:/Users/mista/Desktop/JotPK/butano/hw/3rd_party/maxmod/include/mm_types.h \
+ C:/Users/mista/Desktop/JotPK/butano/hw/3rd_party/maxmod/include/mm_mas.h \
+ C:/Users/mista/Desktop/JotPK/butano/hw/3rd_party/maxmod/include/mm_msl.h \
+ C:/Users/mista/Desktop/JotPK/butano/hw/3rd_party/maxmod/src/core/effect.h \
+ C:/Users/mista/Desktop/JotPK/butano/hw/3rd_party/maxmod/src/core/mas.h \
+ C:/Users/mista/Desktop/JotPK/butano/hw/3rd_party/maxmod/src/core/channel_types.h \
+ C:/Users/mista/Desktop/JotPK/butano/hw/3rd_party/maxmod/src/core/player_types.h \
+ C:/Users/mista/Desktop/JotPK/butano/hw/3rd_party/maxmod/src/core/mixer.h \
+ C:/Users/mista/Desktop/JotPK/butano/hw/3rd_party/maxmod/src/core/player_types.h \
+ C:/Users/mista/Desktop/JotPK/butano/hw/3rd_party/maxmod/src/gba/mixer.h \
+ C:/Users/mista/Desktop/JotPK/butano/hw/3rd_party/maxmod/src/core/channel_types.h
+C:/Users/mista/Desktop/JotPK/butano/hw/3rd_party/maxmod/include/maxmod.h:
+C:/Users/mista/Desktop/JotPK/butano/hw/3rd_party/maxmod/include/mm_types.h:
+C:/Users/mista/Desktop/JotPK/butano/hw/3rd_party/maxmod/include/mm_mas.h:
+C:/Users/mista/Desktop/JotPK/butano/hw/3rd_party/maxmod/include/mm_msl.h:
+C:/Users/mista/Desktop/JotPK/butano/hw/3rd_party/maxmod/src/core/effect.h:
+C:/Users/mista/Desktop/JotPK/butano/hw/3rd_party/maxmod/src/core/mas.h:
+C:/Users/mista/Desktop/JotPK/butano/hw/3rd_party/maxmod/src/core/channel_types.h:
+C:/Users/mista/Desktop/JotPK/butano/hw/3rd_party/maxmod/src/core/player_types.h:
+C:/Users/mista/Desktop/JotPK/butano/hw/3rd_party/maxmod/src/core/mixer.h:
+C:/Users/mista/Desktop/JotPK/butano/hw/3rd_party/maxmod/src/core/player_types.h:
+C:/Users/mista/Desktop/JotPK/butano/hw/3rd_party/maxmod/src/gba/mixer.h:
+C:/Users/mista/Desktop/JotPK/butano/hw/3rd_party/maxmod/src/core/channel_types.h:

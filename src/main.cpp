@@ -1,0 +1,181 @@
+//basic std includes
+#include <iostream>
+//necessary includes for butano
+#include "bn_vector.h"
+#include "bn_core.h"
+#include "bn_keypad.h"
+#include "bn_fixed.h"
+#include "bn_sprite_ptr.h"
+//includes for sprite items
+#include "bn_sprite_items_player.h"
+#include "bn_sprite_items_bullet.h"
+#include "bn_music.h"
+#include "bn_music_items.h"
+//#include "bn_sprite_items_enemy.h"
+class playerProjectile
+{
+    public:
+    int direction;
+    bn::sprite_ptr projectile_sprite;
+    
+    //bullet constructor
+    playerProjectile(int direction, bn::sprite_ptr projectile_sprite) : direction(direction), projectile_sprite(projectile_sprite)
+    {
+        projectile_sprite.set_scale(.5);
+    }
+    
+    void move(){
+        if(direction == 0)
+        {
+            projectile_sprite.set_x(projectile_sprite.x() + 1);
+        }
+        else if(direction == 1)
+        {
+            projectile_sprite.set_x(projectile_sprite.x() - 1);
+        }
+        else if(direction == 2){
+            projectile_sprite.set_y(projectile_sprite.y() - 1);
+        }
+        else if(direction == 3){
+            projectile_sprite.set_y(projectile_sprite.y() + 1);
+        }
+    }
+    
+    bool is_off_screen()
+    {
+        // Butano Screen space center is (0,0). 
+        // Horizontal range: -120 to 120 | Vertical range: -80 to 80
+        //offset by half of the sprites side length to account for the sprite size
+        
+        if(projectile_sprite.x() > 120 || projectile_sprite.x() < -120 || 
+        projectile_sprite.y() > 80 || projectile_sprite.y() < -80)
+        {
+            return true;
+        }
+        return false;
+    }
+};
+
+class enemyProjectile{
+    public:
+    int direction;
+    bn::sprite_ptr projectile_sprite;
+    
+    enemyProjectile(int direction, bn::sprite_ptr projectile_sprite) : direction(direction), projectile_sprite(projectile_sprite)
+    {
+        projectile_sprite.set_scale(.5);
+    }
+    void move(){
+        if(direction == 0)
+        {
+            projectile_sprite.set_x(projectile_sprite.x() + 1);
+        }
+        else if(direction == 1)
+        {
+            projectile_sprite.set_x(projectile_sprite.x() - 1);
+        }
+        else if(direction == 2){
+            projectile_sprite.set_y(projectile_sprite.y() - 1);
+        }
+        else if(direction == 3){
+            projectile_sprite.set_y(projectile_sprite.y() + 1);
+        }
+    }
+    
+};
+//class for enemies
+class enemy{
+    public:
+    bn::sprite_ptr enemy_sprite;
+    //we will implement enemy types later
+    int type; // the only enemy type we will implement is an enemy that runs towards you
+    
+    enemy(int type, bn::sprite_ptr enemy_sprite) : type(type), enemy_sprite(enemy_sprite)
+    {
+        //set the scale of the enemy sprite
+        enemy_sprite.set_scale(.5);
+        
+    }
+};
+int main()
+{
+    bn::core::init();
+    //start theme music
+    bn::music_items::theme.play();
+    //create vector for player projectiles
+    bn::vector<playerProjectile, 20> projectiles;
+    
+    //initalize sprite for player
+    bn::sprite_ptr player = bn::sprite_items::player.create_sprite(0, 0);
+    int player_direction = 0; //0 = right, 1 = left, 2 = up, 3 = down
+    
+    //core update loop
+    while(true)
+    {    
+        if(bn::keypad::right_held())
+        {
+            player.set_x(player.x() + 1);   
+            player_direction = 0;
+        }
+        else if(bn::keypad::left_held())
+        {
+            player.set_x(player.x() - 1);
+            player_direction = 1;
+        }
+        
+        if(bn::keypad::up_held())
+        {
+            player.set_y(player.y() - 1);
+            player_direction = 2;
+        }
+        else if(bn::keypad::down_held())
+        {
+            player.set_y(player.y() + 1);   
+            player_direction = 3;
+        }
+        
+        if(bn::keypad::a_pressed())
+        {
+            // check if vector is full before creating a new projectile to avoid overflow
+            if(!projectiles.full())
+            {
+                bn::sprite_ptr projectile_sprite = bn::sprite_items::bullet.create_sprite(player.x(), player.y());
+                projectiles.push_back(playerProjectile(player_direction, projectile_sprite));
+            }
+        }
+        
+        //check to see if any projectiles are off screen and remove them from the vector if they are
+        //if theyre not move them
+        auto projectile = projectiles.begin();
+        while(projectile != projectiles.end())
+        {
+            projectile->move();
+            
+            if(projectile->is_off_screen())
+            {
+                projectile = projectiles.erase(projectile); 
+            }
+            else
+            {
+                ++projectile;
+            }
+        }
+        
+        auto enemy_projectile = projectiles.begin();
+        while(projectile != projectiles.end())
+        {
+            projectile->move();
+            
+            if(projectile->is_off_screen())
+            {
+                projectile = projectiles.erase(projectile); 
+            }
+            else
+            {
+                ++projectile;
+            }
+            
+        }
+        bn::core::update();
+    }
+}
