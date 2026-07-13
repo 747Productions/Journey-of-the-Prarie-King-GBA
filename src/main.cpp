@@ -2,16 +2,21 @@
 #include <iostream>
 //necessary includes for butano
 #include "bn_vector.h"
-#include "bn_core.h"
 #include "bn_keypad.h"
 #include "bn_fixed.h"
+#include "bn_core.h"
 #include "bn_sprite_ptr.h"
+#include "bn_sound.h"
+#include "bn_sound_items.h"
 //includes for sprite items
 #include "bn_sprite_items_player.h"
 #include "bn_sprite_items_bullet.h"
 #include "bn_music.h"
 #include "bn_music_items.h"
 //#include "bn_sprite_items_enemy.h"
+//debug variables to make sound mixing easier
+float theme_volume = 0.5;
+float footstep_volume = 0.3;
 class playerProjectile
 {
     public:
@@ -102,22 +107,24 @@ class enemy{
         //we will implement this later
     }
 };
+
+
 int main()
 {
+    
     bn::core::init();
     //bools to set which powerups are active
-    bool upgrade_active = false;
-    bool wagon_wheel = false;
-    bool coffee = false;
-    bool machine_gun = false;
-    bool badge = false;
-    int stored_upgrade = 0;
+    //bool upgrade_active = false;
+    //bool wagon_wheel = false;
+    //bool coffee = false;
+    //bool machine_gun = false;
+    //bool badge = false;
+    //int stored_upgrade = 0;
     //start theme music
-    //bn::music_items::theme.play();
+    bn::music_items::theme.play(theme_volume);
     //create vector for player projectiles
     bn::vector<playerProjectile, 30> projectiles;
     //create vector for enemy projectiles
-    //im probably making this wayyyyy to big since almost none of the enemies actually shoot
     bn::vector<enemyProjectile, 10> enemy_projectiles;
     //create vector for enemies
     bn::vector<enemy, 30> enemies;
@@ -127,9 +134,19 @@ int main()
     //tracker to keep track of how many frames are left uintil the player is able to shoot again
     //the gameboy runs at 60 fps so the shooting cooldown should probably be around 30
     int player_shooting_cooldown = 0;
+    //tracker for how often the footstep sound plays
+    int footstep_cooldown = 0;
+    //tracker to keep track of when we should play the footstep sound
     //core update loop 
     while(true)
     {    
+        //play footstep noise if any of the dpad buttons are held
+        if(bn::keypad::left_held() || bn::keypad::right_held() || bn::keypad::up_held() || bn::keypad::down_held()) {
+            if(footstep_cooldown == 0){
+                bn::sound_items::footstep.play(footstep_volume);
+                footstep_cooldown = 20;
+            }
+        }
         //player movement checks
         if(bn::keypad::right_held())
         {
@@ -166,7 +183,7 @@ int main()
                     projectiles.push_back(playerProjectile(player_direction, projectile_sprite));
                 }
                 //set shoot cooldown to forty frames to stagger the amount of projectiles
-                player_shooting_cooldown = 40;
+                player_shooting_cooldown = 30;
             }
         }
         
@@ -205,6 +222,9 @@ int main()
         //decrement frame delay variables if they aren't at 0 already
         if(player_shooting_cooldown != 0){
             player_shooting_cooldown--;
+        }
+        if(footstep_cooldown != 0){
+            footstep_cooldown --;
         }
         bn::core::update();
         

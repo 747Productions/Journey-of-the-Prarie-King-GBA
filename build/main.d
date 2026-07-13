@@ -18,24 +18,28 @@ main.o: C:/Users/mista/Desktop/JotPK/src/main.cpp \
  C:/Users/mista/Desktop/JotPK/butano/include/bn_utility.h \
  C:/Users/mista/Desktop/JotPK/butano/include/bn_iterator.h \
  C:/Users/mista/Desktop/JotPK/butano/include/bn_vector_fwd.h \
+ C:/Users/mista/Desktop/JotPK/butano/include/bn_keypad.h \
+ C:/Users/mista/Desktop/JotPK/butano/include/bn_fixed.h \
+ C:/Users/mista/Desktop/JotPK/butano/include/bn_compare.h \
  C:/Users/mista/Desktop/JotPK/butano/include/bn_core.h \
  C:/Users/mista/Desktop/JotPK/butano/include/bn_span.h \
  C:/Users/mista/Desktop/JotPK/butano/include/bn_array.h \
  C:/Users/mista/Desktop/JotPK/butano/include/bn_array_fwd.h \
  C:/Users/mista/Desktop/JotPK/butano/include/bn_span_fwd.h \
  C:/Users/mista/Desktop/JotPK/butano/include/bn_fixed.h \
- C:/Users/mista/Desktop/JotPK/butano/include/bn_compare.h \
  C:/Users/mista/Desktop/JotPK/butano/include/bn_optional.h \
  C:/Users/mista/Desktop/JotPK/butano/include/bn_memory_alias.h \
  C:/Users/mista/Desktop/JotPK/butano/include/bn_string_view.h \
  C:/Users/mista/Desktop/JotPK/butano/include/bn_vblank_callback_type.h \
  C:/Users/mista/Desktop/JotPK/butano/include/bn_core_update_callback_type.h \
- C:/Users/mista/Desktop/JotPK/butano/include/bn_keypad.h \
- C:/Users/mista/Desktop/JotPK/butano/include/bn_fixed.h \
  C:/Users/mista/Desktop/JotPK/butano/include/bn_sprite_ptr.h \
  C:/Users/mista/Desktop/JotPK/butano/include/bn_fixed_point.h \
  C:/Users/mista/Desktop/JotPK/butano/include/bn_point.h \
  C:/Users/mista/Desktop/JotPK/butano/include/bn_fixed_point_fwd.h \
+ C:/Users/mista/Desktop/JotPK/butano/include/bn_sound.h \
+ C:/Users/mista/Desktop/JotPK/butano/include/bn_sound_handle.h \
+ C:/Users/mista/Desktop/JotPK/build/bn_sound_items.h \
+ C:/Users/mista/Desktop/JotPK/butano/include/bn_sound_item.h \
  C:/Users/mista/Desktop/JotPK/build/bn_sprite_items_player.h \
  C:/Users/mista/Desktop/JotPK/butano/include/bn_sprite_item.h \
  C:/Users/mista/Desktop/JotPK/butano/include/bn_sprite_shape_size.h \
@@ -68,24 +72,28 @@ C:/Users/mista/Desktop/JotPK/butano/include/bn_assert_callback_type.h:
 C:/Users/mista/Desktop/JotPK/butano/include/bn_utility.h:
 C:/Users/mista/Desktop/JotPK/butano/include/bn_iterator.h:
 C:/Users/mista/Desktop/JotPK/butano/include/bn_vector_fwd.h:
+C:/Users/mista/Desktop/JotPK/butano/include/bn_keypad.h:
+C:/Users/mista/Desktop/JotPK/butano/include/bn_fixed.h:
+C:/Users/mista/Desktop/JotPK/butano/include/bn_compare.h:
 C:/Users/mista/Desktop/JotPK/butano/include/bn_core.h:
 C:/Users/mista/Desktop/JotPK/butano/include/bn_span.h:
 C:/Users/mista/Desktop/JotPK/butano/include/bn_array.h:
 C:/Users/mista/Desktop/JotPK/butano/include/bn_array_fwd.h:
 C:/Users/mista/Desktop/JotPK/butano/include/bn_span_fwd.h:
 C:/Users/mista/Desktop/JotPK/butano/include/bn_fixed.h:
-C:/Users/mista/Desktop/JotPK/butano/include/bn_compare.h:
 C:/Users/mista/Desktop/JotPK/butano/include/bn_optional.h:
 C:/Users/mista/Desktop/JotPK/butano/include/bn_memory_alias.h:
 C:/Users/mista/Desktop/JotPK/butano/include/bn_string_view.h:
 C:/Users/mista/Desktop/JotPK/butano/include/bn_vblank_callback_type.h:
 C:/Users/mista/Desktop/JotPK/butano/include/bn_core_update_callback_type.h:
-C:/Users/mista/Desktop/JotPK/butano/include/bn_keypad.h:
-C:/Users/mista/Desktop/JotPK/butano/include/bn_fixed.h:
 C:/Users/mista/Desktop/JotPK/butano/include/bn_sprite_ptr.h:
 C:/Users/mista/Desktop/JotPK/butano/include/bn_fixed_point.h:
 C:/Users/mista/Desktop/JotPK/butano/include/bn_point.h:
 C:/Users/mista/Desktop/JotPK/butano/include/bn_fixed_point_fwd.h:
+C:/Users/mista/Desktop/JotPK/butano/include/bn_sound.h:
+C:/Users/mista/Desktop/JotPK/butano/include/bn_sound_handle.h:
+C:/Users/mista/Desktop/JotPK/build/bn_sound_items.h:
+C:/Users/mista/Desktop/JotPK/butano/include/bn_sound_item.h:
 C:/Users/mista/Desktop/JotPK/build/bn_sprite_items_player.h:
 C:/Users/mista/Desktop/JotPK/butano/include/bn_sprite_item.h:
 C:/Users/mista/Desktop/JotPK/butano/include/bn_sprite_shape_size.h:
