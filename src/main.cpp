@@ -96,28 +96,47 @@ class enemy{
         enemy_sprite.set_scale(.5);
         
     }
+    
+    void move(){
+        //move the enemy towards the player
+        //we will implement this later
+    }
 };
 int main()
 {
     bn::core::init();
+    //bools to set which powerups are active
+    bool upgrade_active = false;
+    bool wagon_wheel = false;
+    bool coffee = false;
+    bool machine_gun = false;
+    bool badge = false;
+    int stored_upgrade = 0;
     //start theme music
-    bn::music_items::theme.play();
+    //bn::music_items::theme.play();
     //create vector for player projectiles
-    bn::vector<playerProjectile, 20> projectiles;
-    
+    bn::vector<playerProjectile, 30> projectiles;
+    //create vector for enemy projectiles
+    //im probably making this wayyyyy to big since almost none of the enemies actually shoot
+    bn::vector<enemyProjectile, 10> enemy_projectiles;
+    //create vector for enemies
+    bn::vector<enemy, 30> enemies;
     //initalize sprite for player
     bn::sprite_ptr player = bn::sprite_items::player.create_sprite(0, 0);
-    int player_direction = 0; //0 = right, 1 = left, 2 = up, 3 = down
-    
-    //core update loop
+    int player_direction = 0; //0 = right, 1 = left, 2 = up, 3 = down, 4
+    //tracker to keep track of how many frames are left uintil the player is able to shoot again
+    //the gameboy runs at 60 fps so the shooting cooldown should probably be around 30
+    int player_shooting_cooldown = 0;
+    //core update loop 
     while(true)
     {    
+        //player movement checks
         if(bn::keypad::right_held())
         {
             player.set_x(player.x() + 1);   
             player_direction = 0;
         }
-        else if(bn::keypad::left_held())
+        if(bn::keypad::left_held())
         {
             player.set_x(player.x() - 1);
             player_direction = 1;
@@ -128,19 +147,26 @@ int main()
             player.set_y(player.y() - 1);
             player_direction = 2;
         }
-        else if(bn::keypad::down_held())
+        if(bn::keypad::down_held())
         {
             player.set_y(player.y() + 1);   
             player_direction = 3;
         }
         
-        if(bn::keypad::a_pressed())
+        //player fire checks
+        if(bn::keypad::a_held())
         {
-            // check if vector is full before creating a new projectile to avoid overflow
-            if(!projectiles.full())
-            {
-                bn::sprite_ptr projectile_sprite = bn::sprite_items::bullet.create_sprite(player.x(), player.y());
-                projectiles.push_back(playerProjectile(player_direction, projectile_sprite));
+            //check if the player is ready to fire another shot
+            if(player_shooting_cooldown == 0){
+                
+                // check if vector is full before creating a new projectile to avoid overflow
+                if(!projectiles.full())
+                {
+                    bn::sprite_ptr projectile_sprite = bn::sprite_items::bullet.create_sprite(player.x(), player.y());
+                    projectiles.push_back(playerProjectile(player_direction, projectile_sprite));
+                }
+                //set shoot cooldown to forty frames to stagger the amount of projectiles
+                player_shooting_cooldown = 40;
             }
         }
         
@@ -176,6 +202,11 @@ int main()
             }
             
         }
+        //decrement frame delay variables if they aren't at 0 already
+        if(player_shooting_cooldown != 0){
+            player_shooting_cooldown--;
+        }
         bn::core::update();
+        
     }
 }
