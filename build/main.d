@@ -40,6 +40,8 @@ main.o: C:/Users/mista/Desktop/JotPK/src/main.cpp \
  C:/Users/mista/Desktop/JotPK/butano/include/bn_sound_handle.h \
  C:/Users/mista/Desktop/JotPK/build/bn_sound_items.h \
  C:/Users/mista/Desktop/JotPK/butano/include/bn_sound_item.h \
+ C:/Users/mista/Desktop/JotPK/butano/include/bn_rect.h \
+ C:/Users/mista/Desktop/JotPK/butano/include/bn_size.h \
  C:/Users/mista/Desktop/JotPK/build/bn_sprite_items_player.h \
  C:/Users/mista/Desktop/JotPK/butano/include/bn_sprite_item.h \
  C:/Users/mista/Desktop/JotPK/butano/include/bn_sprite_shape_size.h \
@@ -94,6 +96,8 @@ C:/Users/mista/Desktop/JotPK/butano/include/bn_sound.h:
 C:/Users/mista/Desktop/JotPK/butano/include/bn_sound_handle.h:
 C:/Users/mista/Desktop/JotPK/build/bn_sound_items.h:
 C:/Users/mista/Desktop/JotPK/butano/include/bn_sound_item.h:
+C:/Users/mista/Desktop/JotPK/butano/include/bn_rect.h:
+C:/Users/mista/Desktop/JotPK/butano/include/bn_size.h:
 C:/Users/mista/Desktop/JotPK/build/bn_sprite_items_player.h:
 C:/Users/mista/Desktop/JotPK/butano/include/bn_sprite_item.h:
 C:/Users/mista/Desktop/JotPK/butano/include/bn_sprite_shape_size.h:

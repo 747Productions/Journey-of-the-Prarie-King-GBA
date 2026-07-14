@@ -8,6 +8,7 @@
 #include "bn_sprite_ptr.h"
 #include "bn_sound.h"
 #include "bn_sound_items.h"
+#include "bn_rect.h"
 //includes for sprite items
 #include "bn_sprite_items_player.h"
 #include "bn_sprite_items_bullet.h"
@@ -17,12 +18,14 @@
 //debug variables to make sound mixing easier
 float theme_volume = 0.5;
 float footstep_volume = 0.3;
+//classes for both player and enemy/boss projectiles
 class playerProjectile
 {
     public:
     int direction;
     bn::sprite_ptr projectile_sprite;
-    
+    int width = 16;
+    int height = 16;
     //bullet constructor
     playerProjectile(int direction, bn::sprite_ptr projectile_sprite) : direction(direction), projectile_sprite(projectile_sprite)
     {
@@ -59,8 +62,14 @@ class playerProjectile
         }
         return false;
     }
+    
+    //get bounds for the object in order to check collision with other sprites
+    bn::rect get_bounds() const {
+        
+        bn::fixed_point pos = projectile_sprite.position();
+        return bn::rect(pos.x().integer() - (width / 2), pos.y().integer() - (height / 2), width, height);
+    }
 };
-
 class enemyProjectile{
     public:
     int direction;
@@ -88,27 +97,47 @@ class enemyProjectile{
     }
     
 };
+
 //class for enemies
 class enemy{
     public:
     bn::sprite_ptr enemy_sprite;
     //we will implement enemy types later
     int type; // the only enemy type we will implement is an enemy that runs towards you
-    
+    int height;
+    int width;
     enemy(int type, bn::sprite_ptr enemy_sprite) : type(type), enemy_sprite(enemy_sprite)
     {
         //set the scale of the enemy sprite
         enemy_sprite.set_scale(.5);
-        
+        height = 32;
+        width = 32;
     }
     
     void move(){
         //move the enemy towards the player
         //we will implement this later
     }
+    
+    //get bounds for the object in order to check collision with other sprites
+    bn::rect get_bounds() const {
+        
+        bn::fixed_point pos = enemy_sprite.position();
+        return bn::rect(pos.x().integer() - (width / 2), pos.y().integer() - (height / 2), width, height);
+    }
+    void destroy(){
+        
+    }
 };
 
-
+//check if two rects collide with eachother
+bool collides(bn::rect b1, bn::rect b2){
+    return b1.x() < b2.x() + b2.width() &&
+    b1.x() + b1.width() > b2.x() &&
+    b1.y() < b2.y() + b2.height() &&
+    b1.y() + b1.height() > b2.y();
+}
+//
 int main()
 {
     
@@ -130,6 +159,9 @@ int main()
     bn::vector<enemy, 30> enemies;
     //initalize sprite for player
     bn::sprite_ptr player = bn::sprite_items::player.create_sprite(0, 0);
+    //initialize test enemy
+    bn::sprite_ptr test_enemy = bn::sprite_items::player.create_sprite(0,0);
+    enemies.push_back(enemy(0,test_enemy));
     int player_direction = 0; //0 = right, 1 = left, 2 = up, 3 = down, 4
     //tracker to keep track of how many frames are left uintil the player is able to shoot again
     //the gameboy runs at 60 fps so the shooting cooldown should probably be around 30
@@ -204,20 +236,44 @@ int main()
             }
         }
         
-        auto enemy_projectile = projectiles.begin();
-        while(projectile != projectiles.end())
+        //check to see if any projectiles collide with an enemy
+        //if so destroy both the  enemy and bullet objects
+        auto projectile_obj = projectiles.begin();
+        while(projectile_obj != projectiles.end())
         {
-            projectile->move();
-            
-            if(projectile->is_off_screen())
+            bool projectile_destroyed = false;
+            auto enemyObj = enemies.begin(); 
+            while(enemyObj != enemies.end())
             {
-                projectile = projectiles.erase(projectile); 
+                bn::rect b1 = projectile_obj->get_bounds();
+                bn::rect b2 = enemyObj->get_bounds();
+                //check for collision between bounding boxes of both sprites
+                //if they collide destroy both sprites and mvoe on to the next projectile
+                if(collides(b1, b2))
+                {
+                    enemyObj->enemy_sprite.set_visible(false);
+                    enemyObj = enemies.erase(enemyObj);
+                    
+                    projectile_obj->projectile_sprite.set_visible(false);
+                    projectile_destroyed = true;
+                    //if they collide break the loop also
+                    break;
+                }
+                else
+                {
+                    ++enemyObj; 
+                }
+            }
+            //do as above for projectiles
+            if(projectile_destroyed)
+            {
+                // Update projectile_obj with the next valid iterator returned by erase
+                projectile_obj = projectiles.erase(projectile_obj);
             }
             else
             {
-                ++projectile;
+                ++projectile_obj; // Only advance if the projectile survived
             }
-            
         }
         //decrement frame delay variables if they aren't at 0 already
         if(player_shooting_cooldown != 0){
