@@ -1,4 +1,0 @@
-audio/footstep.wav
-1783926955.6515386
-audio/theme.mod
-1784093455.3930948
