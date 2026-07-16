@@ -90,21 +90,21 @@ class playerProjectile
     bn::sprite_ptr projectile_sprite;
     int width = 4;
     int height = 4;
-
+    
     playerProjectile(int direction, bn::sprite_ptr sprite) : 
-        direction(direction), projectile_sprite(bn::move(sprite))
+    direction(direction), projectile_sprite(bn::move(sprite))
     {
         projectile_sprite.set_scale(.5);
     }
     
     // Move constructor
     playerProjectile(playerProjectile&& other) noexcept :
-        direction(other.direction),
-        projectile_sprite(bn::move(other.projectile_sprite)),
-        width(other.width),
-        height(other.height)
+    direction(other.direction),
+    projectile_sprite(bn::move(other.projectile_sprite)),
+    width(other.width),
+    height(other.height)
     {}
-
+    
     // Move assignment
     playerProjectile& operator=(playerProjectile&& other) noexcept {
         if (this != &other) {
@@ -115,11 +115,11 @@ class playerProjectile
         }
         return *this;
     }
-
+    
     // fix to allow the safe use of smart pointer as object properties
     playerProjectile(const playerProjectile&) = delete;
     playerProjectile& operator=(const playerProjectile&) = delete;
-
+    
     void move(){
         if(direction == 0)      projectile_sprite.set_x(projectile_sprite.x() + 2);
         else if(direction == 1) projectile_sprite.set_x(projectile_sprite.x() - 2);
@@ -129,7 +129,7 @@ class playerProjectile
     
     bool is_off_screen() {
         return (projectile_sprite.x() > 128 || projectile_sprite.x() < -128 || 
-                projectile_sprite.y() > 88  || projectile_sprite.y() < -88);
+        projectile_sprite.y() > 88  || projectile_sprite.y() < -88);
     }
     
     bn::rect get_bounds() const {
@@ -167,29 +167,29 @@ class enemyProjectile{
 };
 //class for enemies
 class Enemy {
-public:
+    public:
     bn::sprite_ptr enemy_sprite;
     int type; 
     int height;
     int width;
-
+    
     // Standard constructor using bn::move to safely accept the sprite handle
     Enemy(int type, bn::sprite_ptr enemy_sprite) : 
-        type(type), enemy_sprite(bn::move(enemy_sprite)) 
+    type(type), enemy_sprite(bn::move(enemy_sprite)) 
     {
         this->enemy_sprite.set_scale(.5);
         height = 16; // Adjusted bounds to match the half-scale sprite projection
         width = 16;
     }
-
+    
     // move constructor
     Enemy(Enemy&& other) noexcept :
-        enemy_sprite(bn::move(other.enemy_sprite)),
-        type(other.type),
-        height(other.height),
-        width(other.width)
+    enemy_sprite(bn::move(other.enemy_sprite)),
+    type(other.type),
+    height(other.height),
+    width(other.width)
     {}
-
+    
     //move assignment for save use in vectors
     Enemy& operator=(Enemy&& other) noexcept {
         if (this != &other) {
@@ -200,15 +200,15 @@ public:
         }
         return *this;
     }
-
+    
     // safe use smart pointer fix that prevents shallow copy pointer issues 
     Enemy(const Enemy&) = delete;
     Enemy& operator=(const Enemy&) = delete;
-
+    
     void move() {
         //DO SOON
     }
-
+    
     bn::rect get_bounds() const {
         bn::fixed_point pos = enemy_sprite.position();
         return bn::rect(pos.x().integer() - (width / 2), pos.y().integer() - (height / 2), width, height);
@@ -314,41 +314,43 @@ int main()
         
         //check to see if any projectiles collide with an enemy
         //if so destroy both the  enemy and bullet objects
-        auto projectile_obj = projectiles.begin();
-        while(projectile_obj != projectiles.end())
-        {
-            bool projectile_destroyed = false;
-            auto enemyObj = enemies.begin(); 
-            while(enemyObj != enemies.end())
-            {
-                bn::rect b1 = projectile_obj->get_bounds();
-                bn::rect b2 = enemyObj->get_bounds();
-                //check for collision between bounding boxes of both sprites
-                //if they collide destroy both sprites and mvoe on to the next projectile
-                if(collides(b1, b2))
-                {
-                    enemyObj->enemy_sprite.set_visible(false);
-                    enemyObj = enemies.erase(enemyObj);
+        for (int e = enemies.size() - 1; e >= 0; --e) {
+            bool enemy_destroyed = false;
+            
+            // Check every bullet against this specific enemy
+            for (int b = projectiles.size() - 1; b >= 0; --b) {
+                
+                // Get bounding boxes using our fixed .set_scale(.5) adjustments
+                bn::rect bullet_bounds = projectiles[b].get_bounds();
+                bn::rect enemy_bounds = enemies[e].get_bounds();
+                
+                // Run the AABB intersection check
+                if (collides(bullet_bounds, enemy_bounds)) {
                     
-                    projectile_obj->projectile_sprite.set_visible(false);
-                    projectile_destroyed = true;
-                    //if they collide break the loop also
-                    break;
-                }
-                else
-                {
-                    ++enemyObj; 
+                    // 1. Remove the bullet from the hardware vector list
+                    projectiles.erase(projectiles.begin() + b);
+                    
+                    // 2. Remove the enemy from the hardware vector list
+                    enemies.erase(enemies.begin() + e);
+                    
+                    // 3. Mark true so we stop checking bullets for this dead enemy
+                    enemy_destroyed = true;
+                    break; 
                 }
             }
-            //do as above for projectiles
-            if(projectile_destroyed)
-            {
-                // Update projectile_obj with the next valid iterator returned by erase
-                projectile_obj = projectiles.erase(projectile_obj);
+            
+            // If this enemy died, jump immediately to evaluating the next enemy
+            if (enemy_destroyed) {
+                continue;
             }
-            else
-            {
-                ++projectile_obj; // Only advance if the projectile survived
+            
+            // Optional: Check if this surviving enemy touches the player
+            if (player.alive && collides(player.get_bounds(), enemies[e].get_bounds())) {
+                lives--;
+                if (lives <= 0) {
+                    player.kill();
+                    gravestone = true;
+                }
             }
         }
         //decrement frame delay variables if they aren't at 0 already
