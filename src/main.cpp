@@ -246,7 +246,8 @@ int main()
     bn::vector<enemyProjectile, 10> enemy_projectiles;
     //create vector for enemies
     bn::vector<Enemy, 30> enemies;
-    bn::sprite_ptr test_enemy = bn::sprite_items::player.create_sprite(0,0);
+    bn::sprite_ptr test_enemy_sprite = bn::sprite_items::player.create_sprite(0,0);
+    enemies.emplace_back(Enemy(0,test_enemy_sprite));
     //initalize sprite for player and create actual object
     bn::sprite_ptr player_sprite = bn::sprite_items::player.create_sprite(50, 50);
     Player player(player_sprite);
@@ -286,13 +287,18 @@ int main()
         }
         //check if any enemies are colliding with the enemy
         auto enemy = enemies.begin();
-        while(enemy != enemies.end()){
+        while(enemy != enemies.end())
+        {
             enemy->move();
-            bn::rect playerBB = player.get_bounds();
-            bn::rect enemyBB = enemy->get_bounds();
-            if(collides(playerBB,enemyBB)){
-                enemies.erase(enemy);
+            
+            if(collides(player.get_bounds(), enemy->get_bounds()))
+            {
+                enemy = enemies.erase(enemy);
                 player.kill();
+            }
+            else
+            {
+                ++enemy;
             }
         }
         //check to see if any projectiles are off screen and remove them from the vector if they are
