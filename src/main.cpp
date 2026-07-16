@@ -10,9 +10,17 @@
 #include "bn_sound.h"
 #include "bn_sound_items.h"
 #include "bn_rect.h"
+#include "bn_regular_bg_ptr.h"
+#include "bn_regular_bg_ptr.h"
+#include "bn_regular_bg_map_item.h"
+
+//includes for background sprite tiles
+#include "bn_regular_bg_tiles_items_groundtile.h"
 //includes for sprite items
 #include "bn_sprite_items_player.h"
 #include "bn_sprite_items_bullet.h"
+
+//includes for music
 #include "bn_music.h"
 #include "bn_music_items.h"
 //#include "bn_sprite_items_enemy.h"
@@ -82,53 +90,54 @@ class playerProjectile
     bn::sprite_ptr projectile_sprite;
     int width = 4;
     int height = 4;
-    //bullet constructor
-    playerProjectile(int direction, bn::sprite_ptr projectile_sprite) : direction(direction), projectile_sprite(projectile_sprite)
+
+    playerProjectile(int direction, bn::sprite_ptr sprite) : 
+        direction(direction), projectile_sprite(bn::move(sprite))
     {
         projectile_sprite.set_scale(.5);
     }
     
+    // Move constructor
+    playerProjectile(playerProjectile&& other) noexcept :
+        direction(other.direction),
+        projectile_sprite(bn::move(other.projectile_sprite)),
+        width(other.width),
+        height(other.height)
+    {}
+
+    // Move assignment
+    playerProjectile& operator=(playerProjectile&& other) noexcept {
+        if (this != &other) {
+            direction = other.direction;
+            projectile_sprite = bn::move(other.projectile_sprite);
+            width = other.width;
+            height = other.height;
+        }
+        return *this;
+    }
+
+    // fix to allow the safe use of smart pointer as object properties
+    playerProjectile(const playerProjectile&) = delete;
+    playerProjectile& operator=(const playerProjectile&) = delete;
+
     void move(){
-        switch(direction){
-            
-        }
-        if(direction == 0)
-        {
-            projectile_sprite.set_x(projectile_sprite.x() + 1);
-        }
-        else if(direction == 1)
-        {
-            projectile_sprite.set_x(projectile_sprite.x() - 1);
-        }
-        else if(direction == 2){
-            projectile_sprite.set_y(projectile_sprite.y() - 1);
-        }
-        else if(direction == 3){
-            projectile_sprite.set_y(projectile_sprite.y() + 1);
-        }
+        if(direction == 0)      projectile_sprite.set_x(projectile_sprite.x() + 2);
+        else if(direction == 1) projectile_sprite.set_x(projectile_sprite.x() - 2);
+        else if(direction == 2) projectile_sprite.set_y(projectile_sprite.y() - 2);
+        else if(direction == 3) projectile_sprite.set_y(projectile_sprite.y() + 2);
     }
     
-    bool is_off_screen()
-    {
-        // Butano Screen space center is (0,0). 
-        // Horizontal range: -120 to 120 | Vertical range: -80 to 80
-        //offset by half of the sprites side length to account for the sprite size
-        
-        if(projectile_sprite.x() > 120 || projectile_sprite.x() < -120 || 
-        projectile_sprite.y() > 80 || projectile_sprite.y() < -80)
-        {
-            return true;
-        }
-        return false;
+    bool is_off_screen() {
+        return (projectile_sprite.x() > 128 || projectile_sprite.x() < -128 || 
+                projectile_sprite.y() > 88  || projectile_sprite.y() < -88);
     }
     
-    //get bounds for the object in order to check collision with other sprites
     bn::rect get_bounds() const {
-        
         bn::fixed_point pos = projectile_sprite.position();
         return bn::rect(pos.x().integer() - (width / 2), pos.y().integer() - (height / 2), width, height);
     }
 };
+
 class enemyProjectile{
     public:
     int direction;
@@ -157,36 +166,55 @@ class enemyProjectile{
     
 };
 //class for enemies
-class Enemy{
-    public:
+class Enemy {
+public:
     bn::sprite_ptr enemy_sprite;
-    //we will implement enemy types later
-    int type; // the only enemy type we will implement is an enemy that runs towards you
+    int type; 
     int height;
     int width;
-    Enemy(int type, bn::sprite_ptr enemy_sprite) : type(type), enemy_sprite(enemy_sprite)
+
+    // Standard constructor using bn::move to safely accept the sprite handle
+    Enemy(int type, bn::sprite_ptr enemy_sprite) : 
+        type(type), enemy_sprite(bn::move(enemy_sprite)) 
     {
-        //set the scale of the enemy sprite
-        enemy_sprite.set_scale(.5);
-        height = 32;
-        width = 32;
+        this->enemy_sprite.set_scale(.5);
+        height = 16; // Adjusted bounds to match the half-scale sprite projection
+        width = 16;
     }
-    
-    void move(){
-        //move the enemy towards the player
-        //we will implement this later
+
+    // move constructor
+    Enemy(Enemy&& other) noexcept :
+        enemy_sprite(bn::move(other.enemy_sprite)),
+        type(other.type),
+        height(other.height),
+        width(other.width)
+    {}
+
+    //move assignment for save use in vectors
+    Enemy& operator=(Enemy&& other) noexcept {
+        if (this != &other) {
+            enemy_sprite = bn::move(other.enemy_sprite);
+            type = other.type;
+            height = other.height;
+            width = other.width;
+        }
+        return *this;
     }
-    
-    //get bounds for the object in order to check collision with other sprites
+
+    // safe use smart pointer fix that prevents shallow copy pointer issues 
+    Enemy(const Enemy&) = delete;
+    Enemy& operator=(const Enemy&) = delete;
+
+    void move() {
+        //DO SOON
+    }
+
     bn::rect get_bounds() const {
-        
         bn::fixed_point pos = enemy_sprite.position();
         return bn::rect(pos.x().integer() - (width / 2), pos.y().integer() - (height / 2), width, height);
     }
-    void destroy(){
-        
-    }
 };
+
 //check if two rects collide with eachother
 bool collides(bn::rect b1, bn::rect b2){
     return b1.x() < b2.x() + b2.width() &&
@@ -199,7 +227,8 @@ int main()
 {
     
     bn::core::init();
-    //lives counter 
+    //create background
+    
     int lives = 5;
     //bools to set which powerups are active
     //bool upgrade_active = false;
@@ -217,9 +246,9 @@ int main()
     bn::vector<enemyProjectile, 10> enemy_projectiles;
     //create vector for enemies
     bn::vector<Enemy, 30> enemies;
-    //create
+    bn::sprite_ptr test_enemy = bn::sprite_items::player.create_sprite(0,0);
     //initalize sprite for player and create actual object
-    bn::sprite_ptr player_sprite = bn::sprite_items::player.create_sprite(0, 0);
+    bn::sprite_ptr player_sprite = bn::sprite_items::player.create_sprite(50, 50);
     Player player(player_sprite);
     //
     //tracker to keep track of how many frames are left uintil the player is able to shoot again
@@ -249,7 +278,7 @@ int main()
                 if(!projectiles.full())
                 {
                     bn::sprite_ptr projectile_sprite = bn::sprite_items::bullet.create_sprite(player.getX(), player.getY());
-                    projectiles.push_back(playerProjectile(player.direction, projectile_sprite));
+                    projectiles.emplace_back(playerProjectile(player.direction, projectile_sprite));
                 }
                 //set shoot cooldown to forty frames to stagger the amount of projectiles
                 player_shooting_cooldown = 30;
@@ -263,7 +292,6 @@ int main()
             bn::rect enemyBB = enemy->get_bounds();
             if(collides(playerBB,enemyBB)){
                 enemies.erase(enemy);
-                ene
                 player.kill();
             }
         }
