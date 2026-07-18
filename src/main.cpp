@@ -1,3 +1,8 @@
+//pragma
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored  "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wshadow"
+#pragma GCC diagnostic ignored "-Wreorder"
 //basic std includes
 #include <iostream>
 #include <memory>
@@ -34,7 +39,6 @@ class Player{
     bn::sprite_ptr player_sprite;
     int width = 32;
     int height = 32;
-    int direction = 0;
     bool alive = true;
     Player(bn::sprite_ptr player_sprite) : player_sprite(player_sprite)
     {
@@ -46,23 +50,19 @@ class Player{
         if(bn::keypad::right_held())
         {
             player_sprite.set_x(player_sprite.x() + 1);   
-            direction = 0;
         }
         if(bn::keypad::left_held())
         {
             player_sprite.set_x(player_sprite.x() - 1);
-            direction = 1;
         }
         
         if(bn::keypad::up_held())
         {
             player_sprite.set_y(player_sprite.y() - 1);
-            direction = 2;
         }
         if(bn::keypad::down_held())
         {
             player_sprite.set_y(player_sprite.y() + 1);   
-            direction = 3;
         }
         
     }
@@ -91,27 +91,60 @@ class playerProjectile
     int width = 4;
     int height = 4;
     
-    playerProjectile(int direction, bn::sprite_ptr sprite) : 
-    direction(direction), projectile_sprite(bn::move(sprite))
+    playerProjectile( bn::sprite_ptr sprite) : 
+    projectile_sprite(bn::move(sprite))
     {
+        //check which direction the bullet should be traveling in
+        if(bn::keypad::up_held() && !bn::keypad::down_held() && bn::keypad::left_held() && !bn::keypad::right_held()){
+            direction = 0;
+        }
+        else if(bn::keypad::up_held() && !bn::keypad::down_held() && !bn::keypad::left_held() && !bn::keypad::right_held()){
+            direction = 1;
+        }
+        else if(bn::keypad::up_held() && !bn::keypad::down_held() && !bn::keypad::left_held() && bn::keypad::right_held()){
+            direction = 2;
+        }
+        else if(!bn::keypad::up_held() && !bn::keypad::down_held() && bn::keypad::left_held() && !bn::keypad::right_held()){
+            direction = 3;
+        }
+        
+        else if(!bn::keypad::up_held() && !bn::keypad::down_held() && !bn::keypad::left_held() && bn::keypad::right_held()){
+            direction = 4;
+        }
+        else if(!bn::keypad::up_held() && bn::keypad::down_held() && bn::keypad::left_held() && !bn::keypad::right_held()){
+            direction = 5;
+        }
+        else if(!bn::keypad::up_held() && bn::keypad::down_held() && !bn::keypad::left_held() && !bn::keypad::right_held()){
+            direction = 6;
+        }
+        else if(!bn::keypad::up_held() && bn::keypad::down_held() && !bn::keypad::left_held() && bn::keypad::right_held()){
+            direction = 7;
+        }
+        else{
+            direction = 5;
+        }
         projectile_sprite.set_scale(.5);
     }
-    
+    //0 1 2
+    //3 X 4
+    //5 6 7
     // Move constructor
-    playerProjectile(playerProjectile&& other) noexcept :
-    direction(other.direction),
-    projectile_sprite(bn::move(other.projectile_sprite)),
-    width(other.width),
-    height(other.height)
-    {}
+    playerProjectile(playerProjectile&& object) noexcept :
+    direction(object.direction),
+    projectile_sprite(bn::move(object.projectile_sprite)),
+    width(object.width),
+    height(object.height)
+    {
+        
+    }
     
     // Move assignment
-    playerProjectile& operator=(playerProjectile&& other) noexcept {
-        if (this != &other) {
-            direction = other.direction;
-            projectile_sprite = bn::move(other.projectile_sprite);
-            width = other.width;
-            height = other.height;
+    playerProjectile& operator=(playerProjectile&& object) noexcept {
+        if (this != &object) {
+            direction = object.direction;
+            projectile_sprite = bn::move(object.projectile_sprite);
+            width = object.width;
+            height = object.height;
         }
         return *this;
     }
@@ -121,12 +154,46 @@ class playerProjectile
     playerProjectile& operator=(const playerProjectile&) = delete;
     
     void move(){
-        if(direction == 0)      projectile_sprite.set_x(projectile_sprite.x() + 2);
-        else if(direction == 1) projectile_sprite.set_x(projectile_sprite.x() - 2);
-        else if(direction == 2) projectile_sprite.set_y(projectile_sprite.y() - 2);
-        else if(direction == 3) projectile_sprite.set_y(projectile_sprite.y() + 2);
+        switch(direction){
+            case 0:
+            projectile_sprite.set_x(projectile_sprite.x()-1);
+            projectile_sprite.set_y(projectile_sprite.y()-1);
+            break;
+            
+            case 1:
+            projectile_sprite.set_y(projectile_sprite.y()-1);
+            break;
+            
+            case 2:
+            projectile_sprite.set_x(projectile_sprite.x()+1);
+            projectile_sprite.set_y(projectile_sprite.y()-1);
+            break;
+            
+            case 3:
+            projectile_sprite.set_x(projectile_sprite.x()-1);
+            break;
+            
+            case 4:
+            projectile_sprite.set_x(projectile_sprite.x()+1);
+            break;
+            
+            case 5:
+            projectile_sprite.set_x(projectile_sprite.x()-1);
+            projectile_sprite.set_y(projectile_sprite.y()+1);
+            break;
+            case 6:
+            projectile_sprite.set_y(projectile_sprite.y()+1);
+            break;
+            case 7:
+            projectile_sprite.set_x(projectile_sprite.x()+1);
+            projectile_sprite.set_y(projectile_sprite.y()+1);
+            break;
+            
+        }
     }
-    
+    //0 1 2
+    //3 X 4
+    //5 6 7
     bool is_off_screen() {
         return (projectile_sprite.x() > 128 || projectile_sprite.x() < -128 || 
         projectile_sprite.y() > 88  || projectile_sprite.y() < -88);
@@ -173,30 +240,30 @@ class Enemy {
     int height;
     int width;
     
-    // Standard constructor using bn::move to safely accept the sprite handle
+    // move constructor that accepts the sprite smart pointer
     Enemy(int type, bn::sprite_ptr enemy_sprite) : 
     type(type), enemy_sprite(bn::move(enemy_sprite)) 
     {
         this->enemy_sprite.set_scale(.5);
-        height = 16; // Adjusted bounds to match the half-scale sprite projection
+        height = 16; 
         width = 16;
     }
     
     // move constructor
-    Enemy(Enemy&& other) noexcept :
-    enemy_sprite(bn::move(other.enemy_sprite)),
-    type(other.type),
-    height(other.height),
-    width(other.width)
+    Enemy(Enemy&& object) noexcept :
+    enemy_sprite(bn::move(object.enemy_sprite)),
+    type(object.type),
+    height(object.height),
+    width(object.width)
     {}
     
-    //move assignment for save use in vectors
-    Enemy& operator=(Enemy&& other) noexcept {
-        if (this != &other) {
-            enemy_sprite = bn::move(other.enemy_sprite);
-            type = other.type;
-            height = other.height;
-            width = other.width;
+    //move assignment for safe use in vectors
+    Enemy& operator=(Enemy&& object) noexcept {
+        if (this != &object) {
+            enemy_sprite = bn::move(object.enemy_sprite);
+            type = object.type;
+            height = object.height;
+            width = object.width;
         }
         return *this;
     }
@@ -215,7 +282,7 @@ class Enemy {
     }
 };
 
-//check if two rects collide with eachother
+//check if two rects collide with eachobject
 bool collides(bn::rect b1, bn::rect b2){
     return b1.x() < b2.x() + b2.width() &&
     b1.x() + b1.width() > b2.x() &&
@@ -246,8 +313,7 @@ int main()
     bn::vector<enemyProjectile, 10> enemy_projectiles;
     //create vector for enemies
     bn::vector<Enemy, 30> enemies;
-    bn::sprite_ptr test_enemy_sprite = bn::sprite_items::player.create_sprite(0,0);
-    enemies.emplace_back(Enemy(0,test_enemy_sprite));
+    enemies.emplace_back(Enemy(0,bn::sprite_items::player.create_sprite(0,0)));
     //initalize sprite for player and create actual object
     bn::sprite_ptr player_sprite = bn::sprite_items::player.create_sprite(50, 50);
     Player player(player_sprite);
@@ -272,35 +338,22 @@ int main()
         //player fire checks
         if(bn::keypad::a_held())
         {
-            //check if the player is ready to fire another shot
+            //check if the player is ready to fire anobject shot
             if(player_shooting_cooldown == 0){
                 
                 // check if vector is full before creating a new projectile to avoid overflow
                 if(!projectiles.full())
                 {
                     bn::sprite_ptr projectile_sprite = bn::sprite_items::bullet.create_sprite(player.getX(), player.getY());
-                    projectiles.emplace_back(playerProjectile(player.direction, projectile_sprite));
+                    projectiles.emplace_back(playerProjectile(projectile_sprite));
                 }
                 //set shoot cooldown to forty frames to stagger the amount of projectiles
                 player_shooting_cooldown = 30;
             }
         }
-        //check if any enemies are colliding with the enemy
-        auto enemy = enemies.begin();
-        while(enemy != enemies.end())
-        {
-            enemy->move();
-            
-            if(collides(player.get_bounds(), enemy->get_bounds()))
-            {
-                enemy = enemies.erase(enemy);
-                player.kill();
-            }
-            else
-            {
-                ++enemy;
-            }
-        }
+        //check if any enemies are colliding with the player
+        
+        
         //check to see if any projectiles are off screen and remove them from the vector if they are
         //if theyre not move them
         auto projectile = projectiles.begin();
@@ -318,29 +371,25 @@ int main()
             }
         }
         
-        //check to see if any projectiles collide with an enemy
-        //if so destroy both the  enemy and bullet objects
+        //enemy collision checks
         for (int e = enemies.size() - 1; e >= 0; --e) {
             bool enemy_destroyed = false;
             
             // Check every bullet against this specific enemy
             for (int b = projectiles.size() - 1; b >= 0; --b) {
                 
-                // Get bounding boxes using our fixed .set_scale(.5) adjustments
                 bn::rect bullet_bounds = projectiles[b].get_bounds();
                 bn::rect enemy_bounds = enemies[e].get_bounds();
                 
-                // Run the AABB intersection check
+                // AABB collision check between bullets and
                 if (collides(bullet_bounds, enemy_bounds)) {
                     
-                    // 1. Remove the bullet from the hardware vector list
                     projectiles.erase(projectiles.begin() + b);
                     
-                    // 2. Remove the enemy from the hardware vector list
                     enemies.erase(enemies.begin() + e);
                     
-                    // 3. Mark true so we stop checking bullets for this dead enemy
                     enemy_destroyed = true;
+                    //break to save compute time 
                     break; 
                 }
             }
@@ -350,7 +399,7 @@ int main()
                 continue;
             }
             
-            // Optional: Check if this surviving enemy touches the player
+            //if its still alive check to see if it collides with the player
             if (player.alive && collides(player.get_bounds(), enemies[e].get_bounds())) {
                 lives--;
                 if (lives <= 0) {
