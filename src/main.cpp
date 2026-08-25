@@ -1,4 +1,4 @@
-//pragma
+//pragma directives to ignore uneccesary warnings
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored  "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wshadow"
@@ -18,284 +18,44 @@
 #include "bn_regular_bg_ptr.h"
 #include "bn_regular_bg_ptr.h"
 #include "bn_regular_bg_map_item.h"
-
-//includes for background sprite tiles
 #include "bn_regular_bg_tiles_items_groundtile.h"
 //includes for sprite items
 #include "bn_sprite_items_player.h"
 #include "bn_sprite_items_bullet.h"
-
+#include "bn_sprite_text_generator.h"
 //includes for music
 #include "bn_music.h"
 #include "bn_music_items.h"
-//#include "bn_sprite_items_enemy.h"
+//custom header files for each custom class
+#include "sprites/Player.hpp"
+#include "sprites/playerProjectile.hpp"
+#include "sprites/Enemy.hpp"
+#include "sprites/enemyProjectile.hpp"
+//custom header files for utility functions
+#include "utils/collides.hpp"
 //debug variables to make sound mixing easier
 float theme_volume = 0.5;
 float footstep_volume = 0.3;
+//debug variables to test spawning enemies
 //DONT FORGET THAT THE NEXT THING YOU SHOULD DO IS MAKE A CLASS FOR POWERUPS LIKE THE WAGON WHEEL
 //classes for both players and enemies
-class Player{
-    public:
-    bn::sprite_ptr player_sprite;
-    int width = 32;
-    int height = 32;
-    bool alive = true;
-    Player(bn::sprite_ptr player_sprite) : player_sprite(player_sprite)
-    {
-        
-    }
-    void move_check(){
-        
-        //player movement checks
-        if(bn::keypad::right_held())
-        {
-            player_sprite.set_x(player_sprite.x() + 1);   
-        }
-        if(bn::keypad::left_held())
-        {
-            player_sprite.set_x(player_sprite.x() - 1);
-        }
-        
-        if(bn::keypad::up_held())
-        {
-            player_sprite.set_y(player_sprite.y() - 1);
-        }
-        if(bn::keypad::down_held())
-        {
-            player_sprite.set_y(player_sprite.y() + 1);   
-        }
-        
-    }
-    bn::rect get_bounds() const {
-        
-        bn::fixed_point pos = player_sprite.position();
-        return bn::rect(pos.x().integer() - (width / 2), pos.y().integer() - (height / 2), width, height);
-    }
-    bn::fixed getX(){
-        return player_sprite.x();
-    }
-    bn::fixed getY(){
-        return player_sprite.y();
-    }
-    void kill(){
-        alive = false;
-        player_sprite.set_visible(false);
-    }
-};
-//classes for both player and enemy/boss projectiles
-class playerProjectile
-{
-    public:
-    int direction;
-    bn::sprite_ptr projectile_sprite;
-    int width = 4;
-    int height = 4;
-    
-    playerProjectile( bn::sprite_ptr sprite) : 
-    projectile_sprite(bn::move(sprite))
-    {
-        //check which direction the bullet should be traveling in
-        if(bn::keypad::up_held() && !bn::keypad::down_held() && bn::keypad::left_held() && !bn::keypad::right_held()){
-            direction = 0;
-        }
-        else if(bn::keypad::up_held() && !bn::keypad::down_held() && !bn::keypad::left_held() && !bn::keypad::right_held()){
-            direction = 1;
-        }
-        else if(bn::keypad::up_held() && !bn::keypad::down_held() && !bn::keypad::left_held() && bn::keypad::right_held()){
-            direction = 2;
-        }
-        else if(!bn::keypad::up_held() && !bn::keypad::down_held() && bn::keypad::left_held() && !bn::keypad::right_held()){
-            direction = 3;
-        }
-        
-        else if(!bn::keypad::up_held() && !bn::keypad::down_held() && !bn::keypad::left_held() && bn::keypad::right_held()){
-            direction = 4;
-        }
-        else if(!bn::keypad::up_held() && bn::keypad::down_held() && bn::keypad::left_held() && !bn::keypad::right_held()){
-            direction = 5;
-        }
-        else if(!bn::keypad::up_held() && bn::keypad::down_held() && !bn::keypad::left_held() && !bn::keypad::right_held()){
-            direction = 6;
-        }
-        else if(!bn::keypad::up_held() && bn::keypad::down_held() && !bn::keypad::left_held() && bn::keypad::right_held()){
-            direction = 7;
-        }
-        else{
-            direction = 5;
-        }
-        projectile_sprite.set_scale(.5);
-    }
-    //0 1 2
-    //3 X 4
-    //5 6 7
-    // Move constructor
-    playerProjectile(playerProjectile&& object) noexcept :
-    direction(object.direction),
-    projectile_sprite(bn::move(object.projectile_sprite)),
-    width(object.width),
-    height(object.height)
-    {
-        
-    }
-    
-    // Move assignment
-    playerProjectile& operator=(playerProjectile&& object) noexcept {
-        if (this != &object) {
-            direction = object.direction;
-            projectile_sprite = bn::move(object.projectile_sprite);
-            width = object.width;
-            height = object.height;
-        }
-        return *this;
-    }
-    
-    // fix to allow the safe use of smart pointer as object properties
-    playerProjectile(const playerProjectile&) = delete;
-    playerProjectile& operator=(const playerProjectile&) = delete;
-    
-    void move(){
-        switch(direction){
-            case 0:
-            projectile_sprite.set_x(projectile_sprite.x()-1);
-            projectile_sprite.set_y(projectile_sprite.y()-1);
-            break;
-            
-            case 1:
-            projectile_sprite.set_y(projectile_sprite.y()-1);
-            break;
-            
-            case 2:
-            projectile_sprite.set_x(projectile_sprite.x()+1);
-            projectile_sprite.set_y(projectile_sprite.y()-1);
-            break;
-            
-            case 3:
-            projectile_sprite.set_x(projectile_sprite.x()-1);
-            break;
-            
-            case 4:
-            projectile_sprite.set_x(projectile_sprite.x()+1);
-            break;
-            
-            case 5:
-            projectile_sprite.set_x(projectile_sprite.x()-1);
-            projectile_sprite.set_y(projectile_sprite.y()+1);
-            break;
-            case 6:
-            projectile_sprite.set_y(projectile_sprite.y()+1);
-            break;
-            case 7:
-            projectile_sprite.set_x(projectile_sprite.x()+1);
-            projectile_sprite.set_y(projectile_sprite.y()+1);
-            break;
-            
-        }
-    }
-    //0 1 2
-    //3 X 4
-    //5 6 7
-    bool is_off_screen() {
-        return (projectile_sprite.x() > 128 || projectile_sprite.x() < -128 || 
-        projectile_sprite.y() > 88  || projectile_sprite.y() < -88);
-    }
-    
-    bn::rect get_bounds() const {
-        bn::fixed_point pos = projectile_sprite.position();
-        return bn::rect(pos.x().integer() - (width / 2), pos.y().integer() - (height / 2), width, height);
-    }
-};
 
-class enemyProjectile{
-    public:
-    int direction;
-    bn::sprite_ptr projectile_sprite;
-    
-    enemyProjectile(int direction, bn::sprite_ptr projectile_sprite) : direction(direction), projectile_sprite(projectile_sprite)
-    {
-        projectile_sprite.set_scale(.5);
-    }
-    void move(){
-        if(direction == 0)
-        {
-            projectile_sprite.set_x(projectile_sprite.x() + 1);
-        }
-        else if(direction == 1)
-        {
-            projectile_sprite.set_x(projectile_sprite.x() - 1);
-        }
-        else if(direction == 2){
-            projectile_sprite.set_y(projectile_sprite.y() - 1);
-        }
-        else if(direction == 3){
-            projectile_sprite.set_y(projectile_sprite.y() + 1);
-        }
-    }
-    
-};
-//class for enemies
-class Enemy {
-    public:
-    bn::sprite_ptr enemy_sprite;
-    int type; 
-    int height;
-    int width;
-    
-    // move constructor that accepts the sprite smart pointer
-    Enemy(int type, bn::sprite_ptr enemy_sprite) : 
-    type(type), enemy_sprite(bn::move(enemy_sprite)) 
-    {
-        this->enemy_sprite.set_scale(.5);
-        height = 16; 
-        width = 16;
-    }
-    
-    // move constructor
-    Enemy(Enemy&& object) noexcept :
-    enemy_sprite(bn::move(object.enemy_sprite)),
-    type(object.type),
-    height(object.height),
-    width(object.width)
-    {}
-    
-    //move assignment for safe use in vectors
-    Enemy& operator=(Enemy&& object) noexcept {
-        if (this != &object) {
-            enemy_sprite = bn::move(object.enemy_sprite);
-            type = object.type;
-            height = object.height;
-            width = object.width;
-        }
-        return *this;
-    }
-    
-    // safe use smart pointer fix that prevents shallow copy pointer issues 
-    Enemy(const Enemy&) = delete;
-    Enemy& operator=(const Enemy&) = delete;
-    
-    void move() {
-        //DO SOON
-    }
-    
-    bn::rect get_bounds() const {
-        bn::fixed_point pos = enemy_sprite.position();
-        return bn::rect(pos.x().integer() - (width / 2), pos.y().integer() - (height / 2), width, height);
-    }
-};
+//classes for both player and enemy/boss projectiles
+
 
 //check if two rects collide with eachobject
-bool collides(bn::rect b1, bn::rect b2){
-    return b1.x() < b2.x() + b2.width() &&
-    b1.x() + b1.width() > b2.x() &&
-    b1.y() < b2.y() + b2.height() &&
-    b1.y() + b1.height() > b2.y();
-}
+
 //
 int main()
 {
     
     bn::core::init();
-    //create background
-    
+    //initalize font
+    constexpr bn::utf8_character font_map[] = {
+        "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", 
+        "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
+        "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "!", "?", " "
+    };    
     int lives = 5;
     //bools to set which powerups are active
     //bool upgrade_active = false;
@@ -303,7 +63,7 @@ int main()
     //bool coffee = false;
     //bool machine_gun = false;
     //bool badge = false;
-    bool gravestone = false;
+    //bool gravestone = false;
     //int stored_upgrade = 0;
     //start theme music
     bn::music_items::theme.play(theme_volume);
@@ -345,7 +105,7 @@ int main()
                 if(!projectiles.full())
                 {
                     bn::sprite_ptr projectile_sprite = bn::sprite_items::bullet.create_sprite(player.getX(), player.getY());
-                    projectiles.emplace_back(playerProjectile(projectile_sprite));
+                    projectiles.emplace_back(playerProjectile(projectile_sprite,player.direction));
                 }
                 //set shoot cooldown to forty frames to stagger the amount of projectiles
                 player_shooting_cooldown = 30;
@@ -404,9 +164,12 @@ int main()
                 lives--;
                 if (lives <= 0) {
                     player.kill();
-                    gravestone = true;
                 }
             }
+        }
+        //move all the enemies if they arent dead
+        for(int e = enemies.size()-1; e >=0;--e){
+            enemies[e].move(player.player_sprite);
         }
         //decrement frame delay variables if they aren't at 0 already
         if(player_shooting_cooldown != 0){

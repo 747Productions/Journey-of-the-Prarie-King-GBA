@@ -1,1 +1,0 @@
-REM building and running Journey of the Prairie King
