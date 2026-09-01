@@ -4,15 +4,21 @@
 //bounding boxes that are meant to be drawn to the screen for visual debugging
 class visualBoundingBox{
     public:
-    
-    int width;
-    int height;
+
     int x;
     int y;
-    bn::sprite_ptr sprite;
-    visualBoundingBox(int width, int height, int x, int y) : width(width), height(height), x(x), y(y)
+    bn::sprite_ptr p1;
+    bn::sprite_ptr p2;
+    bn::sprite_ptr p3;
+    bn::sprite_ptr p4;
+    bn::rect bounds;
+    visualBoundingBox(int width, int height, int x, int y) : x(x), y(y)
     {
-        
+        p1 = bn::sprite_items::bb.create_sprite(x - width/2, y - height/2);
+        p2 = bn::sprite_items::bb.create_sprite(x + width/2, y - height/2);
+        p3 = bn::sprite_items::bb.create_sprite(x + width/2, y + height/2);
+        p4 = bn::sprite_items::bb.create_sprite(x - width/2, y + height/2);
+        bounds = bn::rect(x-(width/2), y-(height/2), width, height);
     }
 };
 
