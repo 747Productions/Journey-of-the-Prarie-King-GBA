@@ -11,7 +11,7 @@ AUDIOBACKEND	:=  maxmod
 AUDIOTOOL		:=  
 DMGAUDIO    	:=  dmg_audio
 DMGAUDIOBACKEND	:=  default
-ROMTITLE    	:=  ROM TITLE
+ROMTITLE    	:=  JotPKGBA
 ROMCODE     	:=  SBTP
 USERFLAGS   	:=  
 USERCXXFLAGS	:=  
@@ -23,8 +23,10 @@ DEFAULTLIBS 	:=
 STACKTRACE		:=	
 USERBUILD   	:=  
 EXTTOOL     	:=  
+#paths for the font build tool
 FONTS := graphics/fonts/Unifont
 TEXTS := graphics/fontTexts/chars.txt
+#exit tool for building fonts and texts
 EXTTOOL := $(PYTHON) butano/tools/butano_fonts_tool.py \
     --build=$(BUILD) \
     --fonts="$(FONTS)" \

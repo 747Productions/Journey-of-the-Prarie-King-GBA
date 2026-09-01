@@ -23,6 +23,7 @@
 #include "bn_sprite_items_player.h"
 #include "bn_sprite_items_bullet.h"
 #include "bn_sprite_text_generator.h"
+#include "unifont_sprite_font.h"
 //includes for music
 #include "bn_music.h"
 #include "bn_music_items.h"
@@ -32,7 +33,8 @@
 #include "sprites/Enemy.hpp"
 #include "sprites/enemyProjectile.hpp"
 //#include "sprites/boundingBox.hpp"
-
+//includes for fonts
+#include "unifont_sprite_font.h"
 //custom header files for utility functions
 #include "utils/collides.hpp"
 //debug variables to make sound mixing easier
@@ -52,9 +54,18 @@ int main()
 {
     
     bn::core::init();
-    //initalize font
-
-    int lives = 5;
+    //create text generator for font
+    bn::sprite_text_generator text_generator(unifont_sprite_font);
+    
+    bn::vector<bn::sprite_ptr, 32> text_sprites;
+    
+    text_generator.generate(
+        0,
+        0,
+        "TEST",
+        text_sprites
+    );
+        int lives = 5;
     //bools to set which powerups are active
     //bool upgrade_active = false;
     //bool wagon_wheel = false;
