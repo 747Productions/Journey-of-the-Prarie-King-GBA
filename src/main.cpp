@@ -19,6 +19,7 @@
 #include "bn_regular_bg_ptr.h"
 #include "bn_regular_bg_map_item.h"
 #include "bn_regular_bg_tiles_items_groundtile.h"
+#include "bn_random.h"
 //includes for sprite items
 #include "bn_sprite_items_player.h"
 #include "bn_sprite_items_bullet.h"
@@ -40,60 +41,54 @@
 //debug variables to make sound mixing easier
 float theme_volume = 0.5;
 float footstep_volume = 0.3;
-//debug variables to test spawning enemies
-//DONT FORGET THAT THE NEXT THING YOU SHOULD DO IS MAKE A CLASS FOR POWERUPS LIKE THE WAGON WHEEL
-//classes for both players and enemies
+//create random number generator
+bn::random rng;
+//screen height and width are 240 and 160 respectively
 
-//classes for both player and enemy/boss projectiles
+//create text generator for font and a text container vector to hold the text sprites
+bn::sprite_text_generator text_generator(unifont_sprite_font);
 
+bn::vector<bn::sprite_ptr, 32> text_sprites;
 
-//check if two rects collide with eachobject
-
+int lives = 5;
+//bools to set which powerups are active
+//bool upgrade_active = false;
+//bool wagon_wheel = false;
+//bool coffee = false;
+//bool machine_gun = false;
+//bool badge = false;
+//bool gravestone = false;
+//int stored_upgrade = 0;
+//start theme music
+//create vector for player projectiles
+bn::vector<playerProjectile, 30> projectiles;
+//create vector for enemy projectiles
+bn::vector<enemyProjectile, 10> enemy_projectiles;
+//create vector for enemies
+bn::vector<Enemy, 30> enemies;
+//create vector for bounding boxes and add a test to the vector
+//initalize sprite for player and create actual object
+bn::sprite_ptr player_sprite = bn::sprite_items::player.create_sprite(50, 50);
+Player player(player_sprite);
 //
+//tracker to keep track of how many frames are left uintil the player is able to shoot again
+int player_shooting_cooldown = 0;
+//tracker for how often the footstep sound plays
+int footstep_cooldown = 0;
+//tracker to keep track of when we should play the footstep sound
+//core update loop 
+void spawnEnemy(){
+    //spawn an enemy at a random location on the screen
+    int x = rng.get_int(240);
+    int y = rng.get_int(160);
+    enemies.emplace_back(Enemy(0,bn::sprite_items::player.create_sprite(x,y)));
+}
 int main()
 {
-    
     bn::core::init();
-    //create text generator for font
-    bn::sprite_text_generator text_generator(unifont_sprite_font);
-    
-    bn::vector<bn::sprite_ptr, 32> text_sprites;
-    
-    text_generator.generate(
-        0,
-        0,
-        "TEST",
-        text_sprites
-    );
-        int lives = 5;
-    //bools to set which powerups are active
-    //bool upgrade_active = false;
-    //bool wagon_wheel = false;
-    //bool coffee = false;
-    //bool machine_gun = false;
-    //bool badge = false;
-    //bool gravestone = false;
-    //int stored_upgrade = 0;
-    //start theme music
     bn::music_items::theme.play(theme_volume);
-    //create vector for player projectiles
-    bn::vector<playerProjectile, 30> projectiles;
-    //create vector for enemy projectiles
-    bn::vector<enemyProjectile, 10> enemy_projectiles;
-    //create vector for enemies
-    bn::vector<Enemy, 30> enemies;
-    enemies.emplace_back(Enemy(0,bn::sprite_items::player.create_sprite(0,0)));
-    //create vector for bounding boxes and add a test to the vector
-    //initalize sprite for player and create actual object
-    bn::sprite_ptr player_sprite = bn::sprite_items::player.create_sprite(50, 50);
-    Player player(player_sprite);
-    //
-    //tracker to keep track of how many frames are left uintil the player is able to shoot again
-    int player_shooting_cooldown = 0;
-    //tracker for how often the footstep sound plays
-    int footstep_cooldown = 0;
-    //tracker to keep track of when we should play the footstep sound
-    //core update loop 
+    
+    
     while(true)
     {    
         //play footstep noise if any of the dpad buttons are held
