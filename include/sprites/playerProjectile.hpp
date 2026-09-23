@@ -41,6 +41,7 @@ class playerProjectile
     playerProjectile(const playerProjectile&) = delete;
     playerProjectile& operator=(const playerProjectile&) = delete;
     
+    
     void move(){
         switch(direction){
             case 0:

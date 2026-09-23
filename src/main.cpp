@@ -6,7 +6,9 @@
 //basic std includes
 #include <iostream>
 #include <memory>
-//necessary includes for butano
+#include <format>
+//butano type/utility includes
+#include "bn_string.h" // Required for string utilities
 #include "bn_vector.h"
 #include "bn_keypad.h"
 #include "bn_fixed.h"
@@ -51,6 +53,7 @@ bn::sprite_text_generator text_generator(unifont_sprite_font);
 bn::vector<bn::sprite_ptr, 32> text_sprites;
 
 int lives = 5;
+int score = 0;
 //bools to set which powerups are active
 //bool upgrade_active = false;
 //bool wagon_wheel = false;
@@ -68,29 +71,54 @@ bn::vector<enemyProjectile, 10> enemy_projectiles;
 bn::vector<Enemy, 30> enemies;
 //create vector for bounding boxes and add a test to the vector
 //initalize sprite for player and create actual object
-bn::sprite_ptr player_sprite = bn::sprite_items::player.create_sprite(50, 50);
-Player player(player_sprite);
-//
+
 //tracker to keep track of how many frames are left uintil the player is able to shoot again
 int player_shooting_cooldown = 0;
 //tracker for how often the footstep sound plays
 int footstep_cooldown = 0;
-//tracker to keep track of when we should play the footstep sound
-//core update loop 
+
 void spawnEnemy(){
     //spawn an enemy at a random location on the screen
-    int x = rng.get_int(240);
-    int y = rng.get_int(160);
+    int x = rng.get_int(-120, 120);
+    int y = rng.get_int(-80,80);
     enemies.emplace_back(Enemy(0,bn::sprite_items::player.create_sprite(x,y)));
 }
+
+//update text labels on the screen to reflect the current game state
+void updateLabels(bn::vector<bn::sprite_ptr, 10>& text_sprites, bn::sprite_text_generator text_generator,int lives, int score) {
+    //clear sprite vector in order to replace the text with updated values
+    text_sprites.clear();
+    // 1. Create a persistent named buffer
+    bn::string<32> score_string;
+    bn::string<32> lives_string;
+    // 2. Pass the buffer by reference into the stream
+    bn::ostringstream score_stream(score_string);
+    bn::ostringstream lives_stream(lives_string);
+    // 3. Populate the stream
+    score_stream << "SCORE: " << score;
+    lives_stream << "LIVES: " << lives;
+
+    // 4. Wipe old sprites and generate new ones (using the buffer we just filled)
+    text_generator.generate(-120, -60, score_string, text_sprites);
+    text_generator.generate(-120, -50, lives_string, text_sprites);
+}
+
 int main()
 {
     bn::core::init();
     bn::music_items::theme.play(theme_volume);
+    bn::sprite_ptr player_sprite = bn::sprite_items::player.create_sprite(50, 50);
+    Player player(player_sprite);
+    spawnEnemy();
+    bn::sprite_text_generator text_generator(unifont_sprite_font);
+    //the game requires very few text sprites so four should be enough
+    bn::vector<bn::sprite_ptr, 10> text_sprites;
     
-    
+
     while(true)
     {    
+        text_sprites.clear();
+        updateLabels(text_sprites, text_generator, lives, score);
         //play footstep noise if any of the dpad buttons are held
         if(bn::keypad::left_held() || bn::keypad::right_held() || bn::keypad::up_held() || bn::keypad::down_held()) {
             if(footstep_cooldown == 0){
@@ -152,7 +180,7 @@ int main()
                     projectiles.erase(projectiles.begin() + b);
                     
                     enemies.erase(enemies.begin() + e);
-                    
+                    score += 10; // Increment score for destroying an enemy
                     enemy_destroyed = true;
                     //break to save compute time 
                     break; 
