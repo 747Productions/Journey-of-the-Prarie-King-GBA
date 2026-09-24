@@ -40,6 +40,7 @@
 #include "unifont_sprite_font.h"
 //custom header files for utility functions
 #include "utils/collides.hpp"
+#include "utils/spawnEnemy.hpp"
 //debug variables to make sound mixing easier
 float theme_volume = 0.5;
 float footstep_volume = 0.3;
@@ -76,13 +77,8 @@ bn::vector<Enemy, 30> enemies;
 int player_shooting_cooldown = 0;
 //tracker for how often the footstep sound plays
 int footstep_cooldown = 0;
+int enemy_spawn_cooldown = 0;
 
-void spawnEnemy(){
-    //spawn an enemy at a random location on the screen
-    int x = rng.get_int(-120, 120);
-    int y = rng.get_int(-80,80);
-    enemies.emplace_back(Enemy(0,bn::sprite_items::player.create_sprite(x,y)));
-}
 
 //update text labels on the screen to reflect the current game state
 void updateLabels(bn::vector<bn::sprite_ptr, 10>& text_sprites, bn::sprite_text_generator text_generator,int lives, int score) {
@@ -109,7 +105,6 @@ int main()
     bn::music_items::theme.play(theme_volume);
     bn::sprite_ptr player_sprite = bn::sprite_items::player.create_sprite(50, 50);
     Player player(player_sprite);
-    spawnEnemy();
     bn::sprite_text_generator text_generator(unifont_sprite_font);
     //the game requires very few text sprites so four should be enough
     bn::vector<bn::sprite_ptr, 10> text_sprites;
@@ -126,8 +121,15 @@ int main()
                 footstep_cooldown = 20;
             }
         }
-        //move the player if any dpad buttons are held
-        player.move_check();
+        //spawn an enemy every 300 frames
+        if(enemy_spawn_cooldown == 0){
+            spawnEnemy(enemies, rng,3);
+            enemy_spawn_cooldown = 300;
+        }
+        //move the player if any dpad buttons are held and the player is still alive
+        if(player.alive){
+            player.move_check();
+        }
         //player fire checks
         if(bn::keypad::a_held())
         {
@@ -210,6 +212,9 @@ int main()
         }
         if(footstep_cooldown != 0){
             footstep_cooldown --;
+        }
+        if(enemy_spawn_cooldown != 0){
+            enemy_spawn_cooldown --;
         }
         bn::core::update();
         
