@@ -1,8 +1,8 @@
 class Player{
     public:
     bn::sprite_ptr player_sprite;
-    int width = 32;
-    int height = 32;
+    int width = 16;
+    int height = 16;
     int direction = 0;
     bool alive = true;
     Player(bn::sprite_ptr player_sprite) : player_sprite(player_sprite)
