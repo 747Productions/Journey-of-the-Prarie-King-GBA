@@ -4,7 +4,6 @@ void spawnEnemy(bn::vector<Enemy, 30>& enemies, bn::random& rng,int amount) {
     if(enemies.size() + amount > enemies.max_size()){
         //if it would exceed the capacity, only spawn enough enemies to fill the vector to its max size
         amount = enemies.max_size() - enemies.size();
-        return; //exit the function early to avoid exceeding the vector's capacity
     }
     for(int i = 0;i<amount;i++){
         int side = rng.get_int(0, 3);
